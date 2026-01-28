@@ -1,10 +1,69 @@
 /**
- * TimeTravel Agency - Chatbot Agent
- * AI-powered travel advisor for temporal destinations
+ * TimeTravel Agency - Chatbot Agent powered by Gemini AI
+ * Conseiller en voyages temporels avec IA générative
  */
 
 class TravelChatbot {
     constructor() {
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIGURATION - La clé API est chargée depuis js/config.js
+        // Voir js/config.example.js pour créer votre fichier de config
+        // ═══════════════════════════════════════════════════════════════════
+        this.API_KEY = typeof CONFIG !== 'undefined' ? CONFIG.GEMINI_API_KEY : null;
+        this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+        // System prompt définissant la personnalité du chatbot
+        this.systemPrompt = `Tu es l'assistant virtuel de TimeTravel Agency, une agence de voyage temporel de luxe.
+Ton rôle : conseiller les clients sur les meilleures destinations temporelles.
+
+Ton ton :
+- Professionnel mais chaleureux
+- Passionné d'histoire
+- Toujours enthousiaste sans être trop familier
+- Expertise en voyage temporel (fictif mais crédible)
+
+Tu connais parfaitement ces trois destinations :
+
+1. PARIS 1889 (Belle Époque)
+   - Inauguration de la Tour Eiffel lors de l'Exposition Universelle
+   - Cafés littéraires avec Maupassant et Verlaine
+   - Moulin Rouge à ses débuts
+   - Grands boulevards haussmanniens
+   - Prix : à partir de 12 500€ (3 jours)
+
+2. CRÉTACÉ -65 MILLIONS D'ANNÉES (Ère des Dinosaures)
+   - Observation de T-Rex, Tricératops, Ptéranodons en liberté
+   - Vol en capsule d'observation blindée sécurisée
+   - Forêts primitives aux végétations géantes
+   - Expérience la plus extraordinaire et unique
+   - Prix : à partir de 45 000€ (équipement sécurité spécial inclus)
+
+3. FLORENCE 1504 (Renaissance italienne)
+   - Atelier de Michel-Ange achevant son David
+   - Carnets de Léonard de Vinci
+   - Palais des Médicis dans leur splendeur
+   - Duomo et Ponte Vecchio à leur apogée
+   - Prix : à partir de 18 900€ (3 jours)
+
+Informations sur l'agence :
+- Fondée en 2847 par le Pr. Helena Vance
+- Plus de 2 millions de voyageurs transportés
+- Taux de satisfaction : 98.7%
+- Technologie : précision ±0.3 secondes, bulle de protection temporelle, protocole de non-interférence
+- Sécurité absolue garantie, aucun paradoxe possible
+
+Tu peux suggérer des destinations selon les intérêts du client :
+- Romantique/art de vivre → Paris 1889
+- Aventure/extraordinaire → Crétacé
+- Art/culture → Florence 1504
+
+Réponds toujours en français, de manière concise (2-4 phrases max sauf si on te demande des détails).
+Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent temporel de l'agence.`;
+
+        // Historique de la conversation pour le contexte
+        this.conversationHistory = [];
+
+        // Éléments DOM
         this.widget = document.getElementById('chatbot');
         this.toggle = document.getElementById('chatbotToggle');
         this.closeBtn = document.getElementById('chatbotClose');
@@ -21,6 +80,12 @@ class TravelChatbot {
     }
 
     init() {
+        // Vérifier si la clé API est configurée
+        if (!this.API_KEY || this.API_KEY === 'VOTRE_CLE_API_GEMINI_ICI') {
+            console.warn('⚠️ Clé API Gemini non configurée. Le chatbot utilisera des réponses de secours.');
+            console.info('💡 Créez js/config.js depuis js/config.example.js pour activer l\'IA Gemini.');
+        }
+
         // Toggle button
         this.toggle.addEventListener('click', () => this.toggleChat());
         this.closeBtn.addEventListener('click', () => this.closeChat());
@@ -70,16 +135,20 @@ class TravelChatbot {
 
     showGreeting() {
         setTimeout(() => {
-            this.addBotMessage(
-                "Bienvenue chez TimeTravel Agency ! Je suis votre conseiller en voyages temporels. " +
-                "Je peux vous aider à choisir votre destination, vous informer sur nos tarifs, " +
-                "ou répondre à toutes vos questions sur l'expérience de voyage dans le temps. " +
-                "Comment puis-je vous aider aujourd'hui ?"
-            );
+            const greeting = "Bienvenue chez TimeTravel Agency ! Je suis votre conseiller en voyages temporels. " +
+                "Que vous rêviez de la Belle Époque parisienne, de l'ère des dinosaures ou de la Renaissance florentine, " +
+                "je suis là pour vous guider. Comment puis-je vous aider ?";
+            this.addBotMessage(greeting);
+
+            // Ajouter le greeting à l'historique
+            this.conversationHistory.push({
+                role: 'model',
+                parts: [{ text: greeting }]
+            });
         }, 500);
     }
 
-    handleUserMessage() {
+    async handleUserMessage() {
         const message = this.input.value.trim();
         if (!message || this.isTyping) return;
 
@@ -87,16 +156,174 @@ class TravelChatbot {
         this.input.value = '';
         this.hideSuggestions();
 
-        // Process and respond
-        setTimeout(() => {
-            this.showTypingIndicator();
-            const response = this.generateResponse(message);
+        // Ajouter le message utilisateur à l'historique
+        this.conversationHistory.push({
+            role: 'user',
+            parts: [{ text: message }]
+        });
 
-            setTimeout(() => {
-                this.hideTypingIndicator();
-                this.addBotMessage(response);
-            }, 1000 + Math.random() * 1000);
-        }, 300);
+        // Afficher l'indicateur de frappe
+        this.showTypingIndicator();
+
+        try {
+            const response = await this.callGeminiAPI(message);
+            this.hideTypingIndicator();
+            this.addBotMessage(response);
+
+            // Ajouter la réponse à l'historique
+            this.conversationHistory.push({
+                role: 'model',
+                parts: [{ text: response }]
+            });
+        } catch (error) {
+            console.error('Erreur Gemini:', error);
+            this.hideTypingIndicator();
+
+            // Réponse de secours en cas d'erreur
+            const fallbackResponse = this.getFallbackResponse(message);
+            this.addBotMessage(fallbackResponse);
+        }
+    }
+
+    async callGeminiAPI(userMessage) {
+        // Si pas de clé API, utiliser les réponses de secours
+        if (!this.API_KEY || this.API_KEY === 'VOTRE_CLE_API_GEMINI_ICI') {
+            return this.getFallbackResponse(userMessage);
+        }
+
+        const requestBody = {
+            contents: [
+                {
+                    role: 'user',
+                    parts: [{ text: this.systemPrompt }]
+                },
+                {
+                    role: 'model',
+                    parts: [{ text: "Compris ! Je suis l'agent temporel de TimeTravel Agency, prêt à conseiller nos clients sur nos destinations extraordinaires." }]
+                },
+                ...this.conversationHistory
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 500,
+            },
+            safetySettings: [
+                {
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    category: "HARM_CATEGORY_HATE_SPEECH",
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                },
+                {
+                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                }
+            ]
+        };
+
+        const response = await fetch(`${this.API_URL}?key=${this.API_KEY}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        throw new Error('Invalid API response');
+    }
+
+    /**
+     * Réponses de secours si l'API Gemini n'est pas disponible
+     */
+    getFallbackResponse(input) {
+        const text = input.toLowerCase();
+
+        // Destinations
+        if (this.matchesPattern(text, ['destination', 'époque', 'où', 'voyager', 'proposez'])) {
+            return "Nous proposons trois destinations exceptionnelles : Paris 1889 (Belle Époque, Tour Eiffel), " +
+                "le Crétacé -65M (dinosaures en liberté), et Florence 1504 (Renaissance, Michel-Ange). " +
+                "Quelle époque vous attire ?";
+        }
+
+        // Paris
+        if (this.matchesPattern(text, ['paris', '1889', 'eiffel', 'belle époque'])) {
+            return "Paris 1889 vous plonge dans la magie de l'Exposition Universelle ! " +
+                "Assistez à l'inauguration de la Tour Eiffel, découvrez le Moulin Rouge naissant. " +
+                "À partir de 12 500€ pour 3 jours d'immersion totale.";
+        }
+
+        // Crétacé
+        if (this.matchesPattern(text, ['crétacé', 'dinosaure', 't-rex', 'préhistoire', '-65'])) {
+            return "Le Crétacé est notre aventure la plus extraordinaire ! " +
+                "Observez T-Rex et Tricératops depuis notre capsule blindée sécurisée. " +
+                "À partir de 45 000€, une expérience unique dans l'univers.";
+        }
+
+        // Florence
+        if (this.matchesPattern(text, ['florence', '1504', 'renaissance', 'michel-ange', 'vinci'])) {
+            return "Florence 1504 est le paradis des amateurs d'art ! " +
+                "Voyez Michel-Ange achever son David, explorez les ateliers de Léonard. " +
+                "À partir de 18 900€ pour un voyage culturel inoubliable.";
+        }
+
+        // Prix
+        if (this.matchesPattern(text, ['prix', 'tarif', 'coût', 'combien', 'budget'])) {
+            return "Nos tarifs (3 jours) : Paris 1889 dès 12 500€, Florence 1504 dès 18 900€, " +
+                "Crétacé -65M dès 45 000€. Tout inclus : transport temporel, guide, équipement, assurance.";
+        }
+
+        // Conseils
+        if (this.matchesPattern(text, ['choisir', 'conseil', 'recommand', 'hésite'])) {
+            return "Pour choisir : romantique et art de vivre → Paris 1889. " +
+                "Aventure extraordinaire → Crétacé. Passion art et culture → Florence 1504. " +
+                "Quels sont vos centres d'intérêt ?";
+        }
+
+        // Sécurité
+        if (this.matchesPattern(text, ['sécurité', 'danger', 'risque', 'sûr'])) {
+            return "Sécurité absolue garantie ! Notre bulle de protection temporelle et le protocole " +
+                "de non-interférence assurent votre sécurité. Aucun paradoxe possible. " +
+                "200 ans d'opération sans incident.";
+        }
+
+        // Salutations
+        if (this.matchesPattern(text, ['bonjour', 'salut', 'hello', 'hey'])) {
+            return "Bonjour et bienvenue ! Prêt à explorer les couloirs du temps ? " +
+                "Je peux vous conseiller sur nos trois destinations exceptionnelles.";
+        }
+
+        // Remerciements
+        if (this.matchesPattern(text, ['merci', 'thanks', 'super', 'génial'])) {
+            return "Avec plaisir ! N'hésitez pas si vous avez d'autres questions. " +
+                "L'aventure temporelle vous attend !";
+        }
+
+        // Réponse par défaut
+        return "Je serais ravi de vous renseigner sur nos voyages temporels ! " +
+            "Souhaitez-vous découvrir nos destinations (Paris 1889, Crétacé, Florence 1504), " +
+            "connaître les tarifs, ou obtenir des conseils personnalisés ?";
+    }
+
+    matchesPattern(text, patterns) {
+        return patterns.some(pattern => text.includes(pattern));
     }
 
     addUserMessage(text) {
@@ -137,189 +364,6 @@ class TravelChatbot {
 
     scrollToBottom() {
         this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-    }
-
-    /**
-     * Response Generation Logic
-     * Pattern matching for common travel queries
-     */
-    generateResponse(input) {
-        const text = input.toLowerCase();
-
-        // Greetings
-        if (this.matchesPattern(text, ['bonjour', 'salut', 'hello', 'hey', 'coucou', 'bonsoir'])) {
-            return this.getRandomResponse([
-                "Bonjour ! Ravi de vous accueillir chez TimeTravel Agency. Quelle époque vous fait rêver ?",
-                "Bienvenue, voyageur temporel ! Comment puis-je vous guider vers votre prochaine aventure ?",
-                "Bonjour ! Prêt à explorer les couloirs du temps ? Je suis là pour vous conseiller."
-            ]);
-        }
-
-        // Destinations overview
-        if (this.matchesPattern(text, ['destination', 'époque', 'où', 'voyager', 'aller', 'proposez', 'offres'])) {
-            return "Nous proposons trois destinations temporelles exceptionnelles :\n\n" +
-                "🗼 Paris 1889 - Vivez la Belle Époque et l'inauguration de la Tour Eiffel\n" +
-                "🦖 Crétacé (-65M) - Observez les dinosaures dans leur habitat naturel\n" +
-                "🎨 Florence 1504 - Rencontrez les maîtres de la Renaissance\n\n" +
-                "Quelle époque vous attire le plus ?";
-        }
-
-        // Paris 1889
-        if (this.matchesPattern(text, ['paris', '1889', 'eiffel', 'belle époque', 'exposition'])) {
-            return "Paris 1889 est notre destination la plus romantique ! Vous pourrez :\n\n" +
-                "• Assister à l'inauguration de la Tour Eiffel lors de l'Exposition Universelle\n" +
-                "• Dîner dans les cafés littéraires où se réunissent Maupassant et Verlaine\n" +
-                "• Découvrir le Moulin Rouge à ses débuts\n" +
-                "• Flâner sur les grands boulevards haussmanniens\n\n" +
-                "Tarif : à partir de 12 500€ pour un séjour de 3 jours. Un voyage dans l'élégance !";
-        }
-
-        // Crétacé
-        if (this.matchesPattern(text, ['crétacé', 'dinosaure', 't-rex', 'préhistoire', '-65', 'jurassique'])) {
-            return "Le Crétacé est notre aventure la plus extraordinaire ! Imaginez :\n\n" +
-                "• Observer des T-Rex, Tricératops et Ptéranodons en liberté\n" +
-                "• Survoler les plaines préhistoriques en capsule d'observation blindée\n" +
-                "• Explorer des forêts primitives aux végétations géantes\n" +
-                "• Sécurité maximale garantie par notre bulle temporelle\n\n" +
-                "Tarif : à partir de 45 000€ (justifié par l'équipement de sécurité spécial). Une expérience unique dans l'univers !";
-        }
-
-        // Florence 1504
-        if (this.matchesPattern(text, ['florence', '1504', 'renaissance', 'michel-ange', 'vinci', 'italie', 'david'])) {
-            return "Florence 1504 est le paradis des amateurs d'art ! Vous découvrirez :\n\n" +
-                "• L'atelier de Michel-Ange alors qu'il achève son David\n" +
-                "• Les carnets de Léonard de Vinci en personne\n" +
-                "• Les palais des Médicis dans leur splendeur originelle\n" +
-                "• Le Duomo et le Ponte Vecchio à leur apogée\n\n" +
-                "Tarif : à partir de 18 900€. Un voyage culturel inoubliable !";
-        }
-
-        // Prices
-        if (this.matchesPattern(text, ['prix', 'tarif', 'coût', 'combien', 'budget', 'cher', 'argent', '€', 'euro'])) {
-            return "Voici nos tarifs de base (séjour 3 jours, 1 voyageur) :\n\n" +
-                "🗼 Paris 1889 : à partir de 12 500€\n" +
-                "🦖 Crétacé -65M : à partir de 45 000€\n" +
-                "🎨 Florence 1504 : à partir de 18 900€\n\n" +
-                "Ces prix incluent : transport temporel, guide historien, équipement d'immersion, et assurance temporelle complète.\n\n" +
-                "Des options premium existent : séjours prolongés, groupes, expériences VIP... Souhaitez-vous un devis personnalisé ?";
-        }
-
-        // How to choose
-        if (this.matchesPattern(text, ['choisir', 'conseil', 'recommand', 'suggér', 'hésite', 'lequel', 'laquelle', 'meilleur', 'préfér'])) {
-            return "Excellente question ! Voici mes conseils pour choisir :\n\n" +
-                "👉 Vous êtes romantique et aimez l'art de vivre ? → Paris 1889\n" +
-                "👉 Vous cherchez l'aventure et l'extraordinaire ? → Crétacé\n" +
-                "👉 Vous êtes passionné d'art et de culture ? → Florence 1504\n\n" +
-                "Pour les familles, je recommande souvent Paris 1889 (accessible à tous les âges). " +
-                "Pour une première expérience temporelle, c'est également idéal.\n\n" +
-                "Pouvez-vous me dire ce qui vous attire le plus dans un voyage ?";
-        }
-
-        // Safety
-        if (this.matchesPattern(text, ['sécurité', 'danger', 'risque', 'sûr', 'safe', 'protection', 'paradoxe'])) {
-            return "La sécurité est notre priorité absolue ! Notre technologie garantit :\n\n" +
-                "🛡️ Bulle de protection temporelle personnelle\n" +
-                "🔒 Protocole de non-interférence historique (vous observez sans modifier)\n" +
-                "⏰ Précision de ±0.3 secondes sur les coordonnées temporelles\n" +
-                "🧬 Pas de risque de paradoxe (technologie quantique brevetée)\n" +
-                "👨‍⚕️ Assistance médicale temporelle 24/7\n\n" +
-                "En 200 ans d'opération (depuis 2847), nous n'avons jamais eu d'incident grave. Voyagez l'esprit tranquille !";
-        }
-
-        // Booking
-        if (this.matchesPattern(text, ['réserv', 'book', 'commander', 'acheter', 'inscription', 'réserver'])) {
-            return "Pour réserver votre voyage temporel :\n\n" +
-                "1️⃣ Remplissez le formulaire de réservation sur notre site\n" +
-                "2️⃣ Un conseiller vous contactera sous 24h pour personnaliser votre expérience\n" +
-                "3️⃣ Après validation, vous recevrez votre kit de préparation historique\n" +
-                "4️⃣ Séance de briefing obligatoire 48h avant le départ\n\n" +
-                "Vous pouvez aussi nous appeler au +33 1 23 45 67 89 pour un conseil personnalisé. Prêt à franchir le pas ?";
-        }
-
-        // Duration
-        if (this.matchesPattern(text, ['durée', 'combien de temps', 'jours', 'semaine', 'long'])) {
-            return "Nos formules de séjour :\n\n" +
-                "• 1 jour : Découverte express (idéal pour une première expérience)\n" +
-                "• 3 jours : Notre formule classique (la plus populaire)\n" +
-                "• 1 semaine : Immersion complète\n" +
-                "• 2 semaines : Pour les passionnés qui veulent tout voir\n\n" +
-                "Le temps s'écoule normalement dans l'époque visitée, mais nous vous ramenons exactement au moment de votre départ. Aucun jet-lag temporel !";
-        }
-
-        // What to bring
-        if (this.matchesPattern(text, ['emporter', 'valise', 'bagages', 'préparer', 'amener', 'vetement'])) {
-            return "Pour votre voyage temporel, nous fournissons tout !\n\n" +
-                "✅ Inclus dans votre réservation :\n" +
-                "• Garde-robe d'époque authentique\n" +
-                "• Traducteur temporel universel\n" +
-                "• Monnaie d'époque\n" +
-                "• Kit de survie adapté\n\n" +
-                "⛔ Interdit :\n" +
-                "• Appareils électroniques modernes\n" +
-                "• Objets anachroniques\n" +
-                "• Médicaments non validés\n\n" +
-                "Vous recevrez un guide complet 2 semaines avant le départ.";
-        }
-
-        // Who / Company
-        if (this.matchesPattern(text, ['qui êtes', 'agence', 'entreprise', 'société', 'histoire', 'fondateur'])) {
-            return "TimeTravel Agency a été fondée en 2847 par le Pr. Helena Vance, pionnière de la chronophysique.\n\n" +
-                "Depuis, nous avons transporté plus de 2 millions de voyageurs à travers le temps, " +
-                "avec un taux de satisfaction de 98,7%.\n\n" +
-                "Notre siège se trouve dans la Zone Temporelle Neutre de Genève. " +
-                "Nous détenons l'accréditation de l'Autorité Temporelle Internationale.\n\n" +
-                "Notre mission : rendre l'Histoire accessible et vivante pour tous.";
-        }
-
-        // Languages
-        if (this.matchesPattern(text, ['langue', 'parler', 'anglais', 'comprendre', 'communication'])) {
-            return "Excellente question ! Grâce à notre traducteur temporel universel, " +
-                "vous comprendrez et serez compris dans n'importe quelle époque.\n\n" +
-                "Ce dispositif discret (implanté temporairement dans l'oreille) traduit " +
-                "instantanément toutes les langues, y compris le vieux français, l'italien médiéval, " +
-                "et même les signaux des dinosaures !\n\n" +
-                "Nos guides parlent couramment français, anglais, et les langues de destination.";
-        }
-
-        // Thank you
-        if (this.matchesPattern(text, ['merci', 'thanks', 'super', 'génial', 'parfait', 'excellent'])) {
-            return this.getRandomResponse([
-                "Avec plaisir ! N'hésitez pas si vous avez d'autres questions. Bon voyage à travers le temps ! 🕰️",
-                "Je suis ravi d'avoir pu vous aider ! L'aventure temporelle vous attend. ✨",
-                "C'est un plaisir de vous accompagner dans cette aventure ! À bientôt à bord de notre machine temporelle."
-            ]);
-        }
-
-        // Goodbye
-        if (this.matchesPattern(text, ['au revoir', 'bye', 'à bientôt', 'ciao', 'adieu'])) {
-            return "Au revoir et à bientôt ! Que le temps vous soit favorable. " +
-                "N'hésitez pas à revenir si vous avez d'autres questions. " +
-                "L'équipe TimeTravel Agency sera toujours là pour vous guider. 🕰️✨";
-        }
-
-        // Default response
-        return this.getRandomResponse([
-            "Question intéressante ! Pour vous répondre au mieux, pourriez-vous préciser votre demande ? " +
-            "Je peux vous renseigner sur nos destinations (Paris 1889, Crétacé, Florence 1504), " +
-            "les tarifs, la sécurité, ou comment réserver.",
-
-            "Je ne suis pas sûr de bien comprendre. Souhaitez-vous des informations sur :\n" +
-            "• Nos trois destinations temporelles\n" +
-            "• Les tarifs et formules\n" +
-            "• La sécurité et le déroulement du voyage\n" +
-            "• Comment réserver ?",
-
-            "Je suis spécialisé dans les voyages temporels ! Dites-moi ce qui vous intéresse : " +
-            "découvrir nos époques, comparer les prix, ou obtenir des conseils pour choisir votre destination ?"
-        ]);
-    }
-
-    matchesPattern(text, patterns) {
-        return patterns.some(pattern => text.includes(pattern));
-    }
-
-    getRandomResponse(responses) {
-        return responses[Math.floor(Math.random() * responses.length)];
     }
 }
 

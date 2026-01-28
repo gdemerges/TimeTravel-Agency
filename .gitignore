@@ -12,3 +12,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Configuration (contient les clés API - NE PAS VERSIONNER)
+js/config.js
+js/config.local.js
