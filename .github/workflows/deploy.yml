@@ -5,21 +5,24 @@ on:
     branches:
       - main
 
+# Special permissions for GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18' # Or appropriate version for the project
 
     - name: Create config.js
       run: |
@@ -29,17 +32,17 @@ jobs:
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-    - name: Verify config.js
-      run: cat js/config.js
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
 
-    - name: List files in js directory
-      run: ls -l js/
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        # Upload entire repository
+        path: '.'
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./
-        exclude_assets: '.gitignore' # Assuming the root of the repo is the publish directory
+      id: deployment
+      uses: actions/deploy-pages@v2 # Assuming the root of the repo is the publish directory
         # If your site is in a subdirectory like 'docs', change publish_dir to 'docs'
         # Or if it builds to a 'build' folder, change it to 'build'
