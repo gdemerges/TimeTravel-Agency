@@ -18,7 +18,7 @@ Le projet inclut un agent conversationnel (chatbot) intelligent propulsé par **
 - **Guillaume Demergès**
 - **Gabriel Faucon**
 - **Parvin Sultana**
-- **Assaita mama Sakho**
+- **Assaïta Mama Sakho**
 
 ## Fonctionnalités
 
