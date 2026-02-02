@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Create config.js
       run: |
@@ -33,16 +33,16 @@ jobs:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
     - name: Setup Pages
-      uses: actions/configure-pages@v3
+      uses: actions/configure-pages@v5
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v2
+      uses: actions/upload-pages-artifact@v3
       with:
         # Upload entire repository
         path: '.'
 
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v2 # Assuming the root of the repo is the publish directory
+      uses: actions/deploy-pages@v4 # Assuming the root of the repo is the publish directory
         # If your site is in a subdirectory like 'docs', change publish_dir to 'docs'
         # Or if it builds to a 'build' folder, change it to 'build'
