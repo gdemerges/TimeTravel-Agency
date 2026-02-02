@@ -14,6 +14,12 @@ TimeTravel Agency est une expérience web interactive présentant une agence de 
 
 Le projet inclut un agent conversationnel (chatbot) intelligent propulsé par **Google Gemini AI**, capable de conseiller les visiteurs sur les destinations, répondre aux questions sur les tarifs, et guider les utilisateurs dans leur choix de voyage temporel.
 
+### Équipe
+- **Guillaume Demergès**
+- **Gabriel Faucon**
+- **Parvin Sultana**
+- **Assaita mama Sakho**
+
 ## Fonctionnalités
 
 ### Pages et Sections
@@ -200,7 +206,7 @@ Ce projet a été développé avec l'assistance d'outils IA :
 ### Transparence IA
 
 - Le code front-end a été généré par Claude (modèle Opus 4.5) via Claude Code
-- Le chatbot utilise l'API Gemini (gemini-2.0-flash) pour générer des réponses
+- Le chatbot utilise l'API Gemini (gemini-2.5-flash) pour générer des réponses
 - Un system prompt définit la personnalité et les connaissances de l'agent
 - Des réponses de secours (fallback) sont prévues si l'API est indisponible
 
