@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeTravel Agency | Voyages Temporels de Luxe</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Cursor Effect -->
+    <div class="cursor-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-logo">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">TimeTravel</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#destinations">Destinations</a></li>
+            <li><a href="#about">L'Agence</a></li>
+            <li><a href="#reservation">Réserver</a></li>
+        </ul>
+        <button class="nav-cta">Voyager</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-video-container">
+            <video autoplay muted loop playsinline class="hero-video" id="heroVideo">
+                <source src="assets/video/video_ynov_complet.mp4" type="video/mp4">
+            </video>
+            <div class="hero-overlay"></div>
+            <div class="hero-grain"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-line"></span>
+                <span>Depuis 2847</span>
+                <span class="badge-line"></span>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-line">Traversez</span>
+                <span class="title-line title-accent">le Temps</span>
+            </h1>
+            <p class="hero-subtitle">
+                Explorez les époques les plus fascinantes de l'histoire humaine.
+                Des voyages sur mesure, une expérience sans pareille.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#destinations" class="btn btn-primary">
+                    <span>Découvrir nos époques</span>
+                    <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="#about" class="btn btn-ghost">En savoir plus</a>
+            </div>
+        </div>
+
+        <div class="hero-scroll-indicator">
+            <div class="scroll-line"></div>
+            <span>Défiler</span>
+        </div>
+
+        <div class="hero-decorations">
+            <div class="deco-circle deco-circle-1"></div>
+            <div class="deco-circle deco-circle-2"></div>
+            <div class="deco-line deco-line-1"></div>
+            <div class="deco-line deco-line-2"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-container">
+            <div class="about-header">
+                <span class="section-label">Notre Mission</span>
+                <h2 class="section-title">L'Excellence du Voyage Temporel</h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-card-icon">
+                        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="24" cy="24" r="20"/>
+                            <path d="M24 14v10l6 6"/>
+                        </svg>
+                    </div>
+                    <h3>Précision Temporelle</h3>
+                    <p>Notre technologie quantique garantit une précision de ±0.3 secondes sur vos coordonnées temporelles.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">
+                        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M24 4l6 12 14 2-10 10 2 14-12-6-12 6 2-14L4 18l14-2z"/>
+                        </svg>
+                    </div>
+                    <h3>Expérience Premium</h3>
+                    <p>Chaque voyage est accompagné par un guide historien certifié et équipé de notre technologie d'immersion.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">
+                        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 24c0-8 6-16 12-16s12 8 12 16-6 16-12 16-12-8-12-16z"/>
+                            <ellipse cx="24" cy="24" rx="20" ry="8"/>
+                        </svg>
+                    </div>
+                    <h3>Sécurité Absolue</h3>
+                    <p>Protocole de non-interférence historique et bulle de protection temporelle pour chaque voyageur.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Destinations Section -->
+    <section class="destinations" id="destinations">
+        <div class="destinations-header">
+            <span class="section-label">Nos Époques</span>
+            <h2 class="section-title">Destinations Temporelles</h2>
+            <p class="section-desc">Trois fenêtres temporelles exceptionnelles, soigneusement sélectionnées pour leur richesse historique.</p>
+        </div>
+
+        <div class="destinations-grid">
+            <!-- Paris 1889 -->
+            <article class="destination-card" data-epoch="paris-1889">
+                <div class="card-image-container">
+                    <img src="assets/images/hero.png" alt="Paris 1889 - Belle Époque" class="card-image">
+                    <div class="card-image-overlay"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-epoch">
+                        <span class="epoch-year">1889</span>
+                        <span class="epoch-era">Belle Époque</span>
+                    </div>
+                    <h3 class="card-title">Paris</h3>
+                    <p class="card-description">
+                        Assistez à l'inauguration de la Tour Eiffel lors de l'Exposition Universelle.
+                        Flânez sur les grands boulevards, découvrez les cafés littéraires où se réunissent
+                        Maupassant et Verlaine.
+                    </p>
+                    <ul class="card-highlights">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Exposition Universelle
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Tour Eiffel originelle
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Moulin Rouge
+                        </li>
+                    </ul>
+                    <div class="card-footer">
+                        <div class="card-price">
+                            <span class="price-label">À partir de</span>
+                            <span class="price-value">12 500 €</span>
+                        </div>
+                        <button class="card-btn" data-destination="Paris 1889">
+                            <span>Explorer</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-glow"></div>
+            </article>
+
+            <!-- Crétacé -->
+            <article class="destination-card" data-epoch="cretace">
+                <div class="card-image-container">
+                    <img src="assets/images/hero2.png" alt="Crétacé - Ère des Dinosaures" class="card-image">
+                    <div class="card-image-overlay"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-epoch">
+                        <span class="epoch-year">-65M</span>
+                        <span class="epoch-era">Crétacé Supérieur</span>
+                    </div>
+                    <h3 class="card-title">Ère des Dinosaures</h3>
+                    <p class="card-description">
+                        Observez les derniers géants de la Terre dans leur habitat naturel.
+                        Une expérience unique en capsule d'observation blindée, survolant
+                        les plaines du Crétacé.
+                    </p>
+                    <ul class="card-highlights">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            T-Rex en liberté
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Forêts primitives
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Vol en capsule
+                        </li>
+                    </ul>
+                    <div class="card-footer">
+                        <div class="card-price">
+                            <span class="price-label">À partir de</span>
+                            <span class="price-value">45 000 €</span>
+                        </div>
+                        <button class="card-btn" data-destination="Crétacé -65M">
+                            <span>Explorer</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-glow"></div>
+            </article>
+
+            <!-- Florence 1504 -->
+            <article class="destination-card" data-epoch="florence-1504">
+                <div class="card-image-container">
+                    <img src="assets/images/hero3.png" alt="Florence 1504 - Renaissance" class="card-image">
+                    <div class="card-image-overlay"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-epoch">
+                        <span class="epoch-year">1504</span>
+                        <span class="epoch-era">Renaissance</span>
+                    </div>
+                    <h3 class="card-title">Florence</h3>
+                    <p class="card-description">
+                        Contemplez Michel-Ange achevant son David. Déambulez dans les ateliers
+                        de Léonard de Vinci et assistez aux débats philosophiques de l'Académie
+                        platonicienne.
+                    </p>
+                    <ul class="card-highlights">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Atelier de Michel-Ange
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Palais des Médicis
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                            Duomo original
+                        </li>
+                    </ul>
+                    <div class="card-footer">
+                        <div class="card-price">
+                            <span class="price-label">À partir de</span>
+                            <span class="price-value">18 900 €</span>
+                        </div>
+                        <button class="card-btn" data-destination="Florence 1504">
+                            <span>Explorer</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-glow"></div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Reservation Section -->
+    <section class="reservation" id="reservation">
+        <div class="reservation-container">
+            <div class="reservation-info">
+                <span class="section-label">Réservation</span>
+                <h2 class="section-title">Planifiez Votre Voyage</h2>
+                <p class="reservation-desc">
+                    Chaque voyage est unique. Notre équipe d'experts temporels créera
+                    pour vous une expérience sur mesure, adaptée à vos désirs et votre profil voyageur.
+                </p>
+                <div class="reservation-features">
+                    <div class="feature">
+                        <div class="feature-icon">✓</div>
+                        <span>Consultation personnalisée offerte</span>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✓</div>
+                        <span>Préparation historique complète</span>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✓</div>
+                        <span>Assurance temporelle incluse</span>
+                    </div>
+                </div>
+            </div>
+            <form class="reservation-form" id="reservationForm">
+                <div class="form-group">
+                    <label for="name">Nom complet</label>
+                    <input type="text" id="name" name="name" required placeholder="Votre nom">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="votre@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="destination">Destination temporelle</label>
+                    <select id="destination" name="destination" required>
+                        <option value="">Choisir une époque</option>
+                        <option value="paris-1889">Paris 1889 - Belle Époque</option>
+                        <option value="cretace">Crétacé -65M - Dinosaures</option>
+                        <option value="florence-1504">Florence 1504 - Renaissance</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="travelers">Voyageurs</label>
+                        <select id="travelers" name="travelers" required>
+                            <option value="1">1 personne</option>
+                            <option value="2">2 personnes</option>
+                            <option value="3">3 personnes</option>
+                            <option value="4">4 personnes</option>
+                            <option value="5+">Groupe (5+)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Durée du séjour</label>
+                        <select id="duration" name="duration" required>
+                            <option value="1">1 jour</option>
+                            <option value="3">3 jours</option>
+                            <option value="7">1 semaine</option>
+                            <option value="14">2 semaines</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message (optionnel)</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Parlez-nous de vos attentes..."></textarea>
+                </div>
+                <button type="submit" class="form-submit">
+                    <span>Demander un devis</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-icon">◈</span>
+                <span class="logo-text">TimeTravel Agency</span>
+                <p>Voyages temporels de luxe depuis 2847</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Destinations</h4>
+                    <a href="#destinations">Paris 1889</a>
+                    <a href="#destinations">Crétacé -65M</a>
+                    <a href="#destinations">Florence 1504</a>
+                </div>
+                <div class="footer-col">
+                    <h4>L'Agence</h4>
+                    <a href="#about">Notre histoire</a>
+                    <a href="#about">Technologie</a>
+                    <a href="#about">Sécurité</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <a href="mailto:contact@timetravel.agency">contact@timetravel.agency</a>
+                    <a href="#">+33 1 23 45 67 89</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2847 TimeTravel Agency. Tous droits réservés à travers le temps.</p>
+            <p class="footer-legal">Licence d'exploitation temporelle N°TTA-2847-FR-001</p>
+        </div>
+    </footer>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget" id="chatbot">
+        <button class="chatbot-toggle" id="chatbotToggle" aria-label="Ouvrir le chat">
+            <svg class="chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+            <span class="chatbot-notification">1</span>
+        </button>
+
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-avatar">
+                    <span>◈</span>
+                </div>
+                <div class="chatbot-info">
+                    <h3>Agent Temporel</h3>
+                    <span class="chatbot-status">
+                        <span class="status-dot"></span>
+                        En ligne
+                    </span>
+                </div>
+                <button class="chatbot-close" id="chatbotClose" aria-label="Fermer le chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="chatbot-messages" id="chatbotMessages">
+                <!-- Messages will be inserted here -->
+            </div>
+
+            <div class="chatbot-suggestions" id="chatbotSuggestions">
+                <button class="suggestion-btn" data-question="Quelles sont vos destinations ?">Destinations</button>
+                <button class="suggestion-btn" data-question="Quels sont les prix ?">Tarifs</button>
+                <button class="suggestion-btn" data-question="Comment choisir mon époque ?">Conseils</button>
+            </div>
+
+            <form class="chatbot-input" id="chatbotForm">
+                <input type="text" id="chatbotInput" placeholder="Posez-moi vos questions sur les voyages temporels..." autocomplete="off">
+                <button type="submit" aria-label="Envoyer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google Generative AI SDK -->
+    <script type="importmap">
+        {
+            "imports": {
+                "@google/generative-ai": "https://esm.run/@google/generative-ai"
+            }
+        }
+    </script>
+
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+    <script type="module" src="js/chatbot.js"></script>
+</body>
+</html>

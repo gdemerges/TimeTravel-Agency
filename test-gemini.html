@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test API Gemini</title>
+</head>
+<body>
+    <h1>Test de l'API Gemini</h1>
+    <button id="testBtn">Tester l'API</button>
+    <div id="result"></div>
+
+    <script src="js/config.js"></script>
+    <script>
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Test en cours...</p>';
+
+            console.log('Clé API:', CONFIG.GEMINI_API_KEY ? 'Configurée' : 'Non configurée');
+
+            const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+            try {
+                const response = await fetch(`${API_URL}?key=${CONFIG.GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: 'Dis bonjour en une phrase' }]
+                        }]
+                    })
+                });
+
+                console.log('Status:', response.status);
+                console.log('Headers:', response.headers);
+
+                const data = await response.json();
+                console.log('Réponse complète:', data);
+
+                if (response.ok && data.candidates) {
+                    resultDiv.innerHTML = `
+                        <h3>✅ Succès!</h3>
+                        <p><strong>Réponse:</strong> ${data.candidates[0].content.parts[0].text}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3>❌ Erreur API</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                resultDiv.innerHTML = `
+                    <h3>❌ Erreur</h3>
+                    <p><strong>Message:</strong> ${error.message}</p>
+                    <p><strong>Type:</strong> ${error.name}</p>
+                    <p>Vérifiez la console pour plus de détails</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
