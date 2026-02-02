@@ -432,8 +432,17 @@
         </div>
     </div>
 
+    <!-- Google Generative AI SDK -->
+    <script type="importmap">
+        {
+            "imports": {
+                "@google/generative-ai": "https://esm.run/@google/generative-ai"
+            }
+        }
+    </script>
+
     <script src="js/config.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/chatbot.js"></script>
+    <script type="module" src="js/chatbot.js"></script>
 </body>
 </html>

@@ -1,7 +1,10 @@
 /**
  * TimeTravel Agency - Chatbot Agent powered by Gemini AI
  * Conseiller en voyages temporels avec IA générative
+ * Utilise le SDK JavaScript officiel de Google GenAI
  */
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 class TravelChatbot {
     constructor() {
@@ -10,7 +13,12 @@ class TravelChatbot {
         // Voir js/config.example.js pour créer votre fichier de config
         // ═══════════════════════════════════════════════════════════════════
         this.API_KEY = typeof CONFIG !== 'undefined' ? CONFIG.GEMINI_API_KEY : null;
-        this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+        this.MODEL_NAME = 'gemini-1.0-pro';
+
+        // Initialiser le client Gemini
+        this.genAI = null;
+        this.model = null;
+        this.chat = null;
 
         // System prompt définissant la personnalité du chatbot
         this.systemPrompt = `Tu es l'assistant virtuel de TimeTravel Agency, une agence de voyage temporel de luxe.
@@ -60,9 +68,6 @@ Tu peux suggérer des destinations selon les intérêts du client :
 Réponds toujours en français, de manière concise (2-4 phrases max sauf si on te demande des détails).
 Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent temporel de l'agence.`;
 
-        // Historique de la conversation pour le contexte
-        this.conversationHistory = [];
-
         // Éléments DOM
         this.widget = document.getElementById('chatbot');
         this.toggle = document.getElementById('chatbotToggle');
@@ -84,6 +89,52 @@ Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent tem
         if (!this.API_KEY || this.API_KEY === 'VOTRE_CLE_API_GEMINI_ICI') {
             console.warn('⚠️ Clé API Gemini non configurée. Le chatbot utilisera des réponses de secours.');
             console.info('💡 Créez js/config.js depuis js/config.example.js pour activer l\'IA Gemini.');
+        } else {
+            // Initialiser le SDK Gemini
+            this.genAI = new GoogleGenerativeAI(this.API_KEY);
+            this.model = this.genAI.getGenerativeModel({
+                model: this.MODEL_NAME,
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 500,
+                },
+                safetySettings: [
+                    {
+                        category: "HARM_CATEGORY_HARASSMENT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_HATE_SPEECH",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    }
+                ]
+            });
+
+            // Initialiser le chat avec le system prompt
+            this.chat = this.model.startChat({
+                history: [
+                    {
+                        role: 'user',
+                        parts: [{ text: this.systemPrompt }]
+                    },
+                    {
+                        role: 'model',
+                        parts: [{ text: "Compris ! Je suis l'agent temporel de TimeTravel Agency, prêt à conseiller nos clients sur nos destinations extraordinaires." }]
+                    }
+                ]
+            });
+
+            console.log('✅ Gemini SDK initialisé avec le modèle:', this.MODEL_NAME);
         }
 
         // Toggle button
@@ -139,12 +190,6 @@ Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent tem
                 "Que vous rêviez de la Belle Époque parisienne, de l'ère des dinosaures ou de la Renaissance florentine, " +
                 "je suis là pour vous guider. Comment puis-je vous aider ?";
             this.addBotMessage(greeting);
-
-            // Ajouter le greeting à l'historique
-            this.conversationHistory.push({
-                role: 'model',
-                parts: [{ text: greeting }]
-            });
         }, 500);
     }
 
@@ -156,12 +201,6 @@ Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent tem
         this.input.value = '';
         this.hideSuggestions();
 
-        // Ajouter le message utilisateur à l'historique
-        this.conversationHistory.push({
-            role: 'user',
-            parts: [{ text: message }]
-        });
-
         // Afficher l'indicateur de frappe
         this.showTypingIndicator();
 
@@ -169,12 +208,6 @@ Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent tem
             const response = await this.callGeminiAPI(message);
             this.hideTypingIndicator();
             this.addBotMessage(response);
-
-            // Ajouter la réponse à l'historique
-            this.conversationHistory.push({
-                role: 'model',
-                parts: [{ text: response }]
-            });
         } catch (error) {
             console.error('Erreur Gemini:', error);
             this.hideTypingIndicator();
@@ -186,68 +219,28 @@ Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu ES l'agent tem
     }
 
     async callGeminiAPI(userMessage) {
-        // Si pas de clé API, utiliser les réponses de secours
-        if (!this.API_KEY || this.API_KEY === 'VOTRE_CLE_API_GEMINI_ICI') {
+        // Si pas de clé API ou SDK non initialisé, utiliser les réponses de secours
+        if (!this.chat) {
             return this.getFallbackResponse(userMessage);
         }
 
-        const requestBody = {
-            contents: [
-                {
-                    role: 'user',
-                    parts: [{ text: this.systemPrompt }]
-                },
-                {
-                    role: 'model',
-                    parts: [{ text: "Compris ! Je suis l'agent temporel de TimeTravel Agency, prêt à conseiller nos clients sur nos destinations extraordinaires." }]
-                },
-                ...this.conversationHistory
-            ],
-            generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 500,
-            },
-            safetySettings: [
-                {
-                    category: "HARM_CATEGORY_HARASSMENT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_HATE_SPEECH",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                }
-            ]
-        };
+        try {
+            // Envoyer le message au chat (équivalent de client.models.generate_content en Python)
+            const result = await this.chat.sendMessage(userMessage);
+            const response = await result.response;
+            const text = response.text();
 
-        const response = await fetch(`${this.API_URL}?key=${this.API_KEY}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
-        });
+            return text;
+        } catch (error) {
+            console.error('Erreur lors de l\'appel à l\'API Gemini:', error);
 
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
+            // Afficher le détail de l'erreur si disponible
+            if (error.message) {
+                console.error('Message d\'erreur:', error.message);
+            }
+
+            throw error;
         }
-
-        const data = await response.json();
-
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text;
-        }
-
-        throw new Error('Invalid API response');
     }
 
     /**
