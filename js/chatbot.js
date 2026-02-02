@@ -13,7 +13,7 @@ class TravelChatbot {
         // Voir js/config.example.js pour créer votre fichier de config
         // ═══════════════════════════════════════════════════════════════════
         this.API_KEY = typeof CONFIG !== 'undefined' ? CONFIG.GEMINI_API_KEY : null;
-        this.MODEL_NAME = 'gemini-1.0-pro';
+        this.MODEL_NAME = 'gemini-1.5-flash';
 
         // Initialiser le client Gemini
         this.genAI = null;
