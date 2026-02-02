@@ -21,13 +21,16 @@ jobs:
       with:
         node-version: '18' # Or appropriate version for the project
 
-    - name: Create config.js with API key
+    - name: Create config.js
       run: |
         echo "const CONFIG = {" > js/config.js
         echo "    GEMINI_API_KEY: '${{ secrets.GEMINI_API_KEY }}'" >> js/config.js
         echo "};" >> js/config.js
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    - name: Verify config.js
+      run: cat js/config.js
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
