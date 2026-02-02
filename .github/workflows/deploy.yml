@@ -32,6 +32,9 @@ jobs:
     - name: Verify config.js
       run: cat js/config.js
 
+    - name: List files in js directory
+      run: ls -l js/
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
