@@ -13,24 +13,33 @@
     <!-- Cursor Effect -->
     <div class="cursor-glow"></div>
 
+    <!-- Skip Navigation -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
     <!-- Navigation -->
-    <nav class="main-nav">
+    <nav class="main-nav" role="navigation" aria-label="Navigation principale">
         <div class="nav-logo">
             <span class="logo-icon">◈</span>
             <span class="logo-text">TimeTravel</span>
         </div>
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="#destinations">Destinations</a></li>
             <li><a href="#about">L'Agence</a></li>
             <li><a href="#reservation">Réserver</a></li>
         </ul>
-        <button class="nav-cta">Voyager</button>
+        <button class="nav-cta" aria-label="Commencer votre voyage">Voyager</button>
+        <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+        </button>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero" id="main-content">
         <div class="hero-video-container">
-            <video autoplay muted loop playsinline class="hero-video" id="heroVideo">
+            <video autoplay muted loop playsinline class="hero-video" id="heroVideo" preload="metadata">
+                <source src="assets/video/video_ynov_complet.webm" type="video/webm">
                 <source src="assets/video/video_ynov_complet.mp4" type="video/mp4">
             </video>
             <div class="hero-overlay"></div>
@@ -128,7 +137,7 @@
             <!-- Paris 1889 -->
             <article class="destination-card" data-epoch="paris-1889">
                 <div class="card-image-container">
-                    <img src="assets/images/hero.png" alt="Paris 1889 - Belle Époque" class="card-image">
+                    <img src="assets/images/hero.png" alt="Paris 1889 - Belle Époque - Tour Eiffel lors de l'Exposition Universelle" class="card-image" loading="lazy" decoding="async">
                     <div class="card-image-overlay"></div>
                 </div>
                 <div class="card-content">
@@ -175,7 +184,7 @@
             <!-- Crétacé -->
             <article class="destination-card" data-epoch="cretace">
                 <div class="card-image-container">
-                    <img src="assets/images/hero2.png" alt="Crétacé - Ère des Dinosaures" class="card-image">
+                    <img src="assets/images/hero2.png" alt="Crétacé - Ère des Dinosaures - T-Rex dans son habitat naturel" class="card-image" loading="lazy" decoding="async">
                     <div class="card-image-overlay"></div>
                 </div>
                 <div class="card-content">
@@ -222,7 +231,7 @@
             <!-- Florence 1504 -->
             <article class="destination-card" data-epoch="florence-1504">
                 <div class="card-image-container">
-                    <img src="assets/images/hero3.png" alt="Florence 1504 - Renaissance" class="card-image">
+                    <img src="assets/images/hero3.png" alt="Florence 1504 - Renaissance - Ateliers de Michel-Ange et Léonard de Vinci" class="card-image" loading="lazy" decoding="async">
                     <div class="card-image-overlay"></div>
                 </div>
                 <div class="card-content">
@@ -293,43 +302,50 @@
                     </div>
                 </div>
             </div>
-            <form class="reservation-form" id="reservationForm">
+            <form class="reservation-form" id="reservationForm" novalidate>
                 <div class="form-group">
-                    <label for="name">Nom complet</label>
-                    <input type="text" id="name" name="name" required placeholder="Votre nom">
+                    <label for="name">Nom complet <span class="required-indicator">*</span></label>
+                    <input type="text" id="name" name="name" required placeholder="Votre nom" minlength="2" maxlength="100">
+                    <span class="form-error" role="alert"></span>
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Email <span class="required-indicator">*</span></label>
                     <input type="email" id="email" name="email" required placeholder="votre@email.com">
+                    <span class="form-error" role="alert"></span>
                 </div>
                 <div class="form-group">
-                    <label for="destination">Destination temporelle</label>
+                    <label for="destination">Destination temporelle <span class="required-indicator">*</span></label>
                     <select id="destination" name="destination" required>
                         <option value="">Choisir une époque</option>
                         <option value="paris-1889">Paris 1889 - Belle Époque</option>
                         <option value="cretace">Crétacé -65M - Dinosaures</option>
                         <option value="florence-1504">Florence 1504 - Renaissance</option>
                     </select>
+                    <span class="form-error" role="alert"></span>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="travelers">Voyageurs</label>
+                        <label for="travelers">Voyageurs <span class="required-indicator">*</span></label>
                         <select id="travelers" name="travelers" required>
+                            <option value="">Nombre de voyageurs</option>
                             <option value="1">1 personne</option>
                             <option value="2">2 personnes</option>
                             <option value="3">3 personnes</option>
                             <option value="4">4 personnes</option>
                             <option value="5+">Groupe (5+)</option>
                         </select>
+                        <span class="form-error" role="alert"></span>
                     </div>
                     <div class="form-group">
-                        <label for="duration">Durée du séjour</label>
+                        <label for="duration">Durée du séjour <span class="required-indicator">*</span></label>
                         <select id="duration" name="duration" required>
+                            <option value="">Choisir une durée</option>
                             <option value="1">1 jour</option>
                             <option value="3">3 jours</option>
                             <option value="7">1 semaine</option>
                             <option value="14">2 semaines</option>
                         </select>
+                        <span class="form-error" role="alert"></span>
                     </div>
                 </div>
                 <div class="form-group">

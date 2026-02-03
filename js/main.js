@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initCursorGlow();
     initNavigation();
+    initMobileMenu();
     initScrollAnimations();
     initDestinationCards();
     initReservationForm();
@@ -14,13 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Cursor Glow Effect
  * Creates a subtle glow that follows the cursor
+ * Optimized with requestAnimationFrame and reduced motion support
  */
 function initCursorGlow() {
     const cursorGlow = document.querySelector('.cursor-glow');
     if (!cursorGlow) return;
 
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
     let mouseX = 0, mouseY = 0;
     let currentX = 0, currentY = 0;
+    let rafId = null;
 
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
@@ -29,16 +36,28 @@ function initCursorGlow() {
 
     function animateCursor() {
         const ease = 0.1;
-        currentX += (mouseX - currentX) * ease;
-        currentY += (mouseY - currentY) * ease;
+        const dx = mouseX - currentX;
+        const dy = mouseY - currentY;
 
-        cursorGlow.style.left = currentX + 'px';
-        cursorGlow.style.top = currentY + 'px';
+        // Only update if movement is significant (performance optimization)
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+            currentX += dx * ease;
+            currentY += dy * ease;
 
-        requestAnimationFrame(animateCursor);
+            cursorGlow.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%)`;
+        }
+
+        rafId = requestAnimationFrame(animateCursor);
     }
 
-    animateCursor();
+    rafId = requestAnimationFrame(animateCursor);
+
+    // Cleanup function for potential future use
+    return () => {
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+        }
+    };
 }
 
 /**
@@ -47,6 +66,7 @@ function initCursorGlow() {
  */
 function initNavigation() {
     const nav = document.querySelector('.main-nav');
+    const navCta = document.querySelector('.nav-cta');
     let lastScroll = 0;
 
     window.addEventListener('scroll', () => {
@@ -62,6 +82,19 @@ function initNavigation() {
         lastScroll = currentScroll;
     });
 
+    // Nav CTA button - scroll to reservation
+    if (navCta) {
+        navCta.addEventListener('click', () => {
+            const reservationSection = document.getElementById('reservation');
+            if (reservationSection) {
+                reservationSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    }
+
     // Smooth scroll for nav links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -74,6 +107,57 @@ function initNavigation() {
                 });
             }
         });
+    });
+}
+
+/**
+ * Mobile Menu
+ * Handles burger menu toggle for mobile navigation
+ */
+function initMobileMenu() {
+    const burger = document.getElementById('navBurger');
+    const navLinks = document.getElementById('navLinks');
+
+    if (!burger || !navLinks) return;
+
+    // Toggle menu
+    burger.addEventListener('click', () => {
+        const isExpanded = burger.getAttribute('aria-expanded') === 'true';
+        burger.setAttribute('aria-expanded', !isExpanded);
+        navLinks.classList.toggle('active');
+
+        // Trap focus in menu when open
+        if (!isExpanded) {
+            const firstLink = navLinks.querySelector('a');
+            if (firstLink) {
+                firstLink.focus();
+            }
+        }
+    });
+
+    // Close menu when clicking a link
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            burger.setAttribute('aria-expanded', 'false');
+            navLinks.classList.remove('active');
+        });
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            burger.setAttribute('aria-expanded', 'false');
+            navLinks.classList.remove('active');
+            burger.focus();
+        }
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!burger.contains(e.target) && !navLinks.contains(e.target) && navLinks.classList.contains('active')) {
+            burger.setAttribute('aria-expanded', 'false');
+            navLinks.classList.remove('active');
+        }
     });
 }
 
@@ -158,15 +242,165 @@ function initDestinationCards() {
 }
 
 /**
- * Reservation Form Handling
+ * Reservation Form Handling with Real-time Validation
  */
 function initReservationForm() {
     const form = document.getElementById('reservationForm');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    let isSubmitting = false;
+
+    // Validation rules
+    const validationRules = {
+        name: {
+            required: true,
+            minLength: 2,
+            maxLength: 100,
+            pattern: /^[a-zA-ZÀ-ÿ\s'-]+$/,
+            messages: {
+                required: 'Le nom est requis',
+                minLength: 'Le nom doit contenir au moins 2 caractères',
+                maxLength: 'Le nom ne peut pas dépasser 100 caractères',
+                pattern: 'Le nom ne peut contenir que des lettres, espaces et tirets'
+            }
+        },
+        email: {
+            required: true,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            messages: {
+                required: 'L\'email est requis',
+                pattern: 'Veuillez entrer une adresse email valide'
+            }
+        },
+        destination: {
+            required: true,
+            messages: {
+                required: 'Veuillez choisir une destination'
+            }
+        },
+        travelers: {
+            required: true,
+            messages: {
+                required: 'Veuillez sélectionner le nombre de voyageurs'
+            }
+        },
+        duration: {
+            required: true,
+            messages: {
+                required: 'Veuillez sélectionner une durée de séjour'
+            }
+        }
+    };
+
+    /**
+     * Validate a single field
+     */
+    function validateField(field) {
+        const fieldName = field.name;
+        const fieldValue = field.value.trim();
+        const rules = validationRules[fieldName];
+        const formGroup = field.closest('.form-group');
+        const errorElement = formGroup.querySelector('.form-error');
+
+        if (!rules) return true;
+
+        // Clear previous states
+        formGroup.classList.remove('error', 'success');
+        errorElement.textContent = '';
+
+        // Required validation
+        if (rules.required && !fieldValue) {
+            formGroup.classList.add('error');
+            errorElement.textContent = rules.messages.required;
+            return false;
+        }
+
+        // Skip other validations if field is empty and not required
+        if (!fieldValue && !rules.required) {
+            return true;
+        }
+
+        // MinLength validation
+        if (rules.minLength && fieldValue.length < rules.minLength) {
+            formGroup.classList.add('error');
+            errorElement.textContent = rules.messages.minLength;
+            return false;
+        }
+
+        // MaxLength validation
+        if (rules.maxLength && fieldValue.length > rules.maxLength) {
+            formGroup.classList.add('error');
+            errorElement.textContent = rules.messages.maxLength;
+            return false;
+        }
+
+        // Pattern validation
+        if (rules.pattern && !rules.pattern.test(fieldValue)) {
+            formGroup.classList.add('error');
+            errorElement.textContent = rules.messages.pattern;
+            return false;
+        }
+
+        // Field is valid
+        formGroup.classList.add('success');
+        return true;
+    }
+
+    /**
+     * Validate all form fields
+     */
+    function validateForm() {
+        let isValid = true;
+        const fields = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+        fields.forEach(field => {
+            if (!validateField(field)) {
+                isValid = false;
+            }
+        });
+
+        return isValid;
+    }
+
+    // Real-time validation on blur
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', () => {
+            validateField(input);
+            input.parentElement.classList.remove('focused');
+        });
+
+        input.addEventListener('focus', () => {
+            input.parentElement.classList.add('focused');
+        });
+
+        // Clear error on input
+        input.addEventListener('input', () => {
+            const formGroup = input.closest('.form-group');
+            if (formGroup.classList.contains('error')) {
+                validateField(input);
+            }
+        });
+    });
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+
+        // Validate form
+        if (!validateForm()) {
+            // Focus first error field
+            const firstError = form.querySelector('.form-group.error input, .form-group.error select');
+            if (firstError) {
+                firstError.focus();
+            }
+            return;
+        }
+
+        isSubmitting = true;
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
 
@@ -182,20 +416,23 @@ function initReservationForm() {
         `;
         submitBtn.disabled = true;
 
-        // Add spinner animation
-        const spinnerStyle = document.createElement('style');
-        spinnerStyle.textContent = `
-            .spinner {
-                width: 20px;
-                height: 20px;
-                animation: spin 1s linear infinite;
-            }
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(spinnerStyle);
+        // Add spinner animation if not already present
+        if (!document.querySelector('#spinner-style')) {
+            const spinnerStyle = document.createElement('style');
+            spinnerStyle.id = 'spinner-style';
+            spinnerStyle.textContent = `
+                .spinner {
+                    width: 20px;
+                    height: 20px;
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(spinnerStyle);
+        }
 
         // Simulate API call
         setTimeout(() => {
@@ -212,23 +449,18 @@ function initReservationForm() {
                 submitBtn.innerHTML = originalText;
                 submitBtn.style.background = '';
                 submitBtn.disabled = false;
+                isSubmitting = false;
                 form.reset();
+
+                // Clear all validation states
+                const formGroups = form.querySelectorAll('.form-group');
+                formGroups.forEach(group => {
+                    group.classList.remove('error', 'success');
+                });
             }, 3000);
         }, 1500);
 
         console.log('Reservation data:', data);
-    });
-
-    // Input animations
-    const inputs = form.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('focus', () => {
-            input.parentElement.classList.add('focused');
-        });
-
-        input.addEventListener('blur', () => {
-            input.parentElement.classList.remove('focused');
-        });
     });
 }
 
